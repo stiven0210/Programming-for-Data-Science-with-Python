@@ -1,0 +1,103 @@
+
+--Q1 - ¿We want to know which were the most rented movies according to their clASsification?
+--It is required to know which are the 10 most rented "G" rated movies.
+--You must create a query that shows by rating and movie how many times they have been rented
+	 
+WITH q1
+AS (SELECT
+  *
+FROM category AS c
+JOIN film_category AS fc
+  ON fc.category_id = c.category_id
+JOIN film AS f
+  ON f.film_id = fc.film_id
+JOIN Inventory AS i
+  ON i.film_id = f.film_id
+JOIN rental AS r
+  ON i.inventory_id = r.inventory_id)
+
+SELECT COUNT(2), 
+       title AS film_title, 
+       name AS category_name
+FROM q1
+WHERE rating in ('G')
+GROUP BY title, name
+ORDER BY 1 DESC;
+
+-----------------------------
+--Q2 - ¿Who were the 5 most wanted actors?
+--It is required to know the number of rented movies by rating and the length of rental that each one had.
+--Debes crear una consulta que muestre por clasificación, y promedio de la duración del alquiler
+
+WITH q2
+AS (SELECT COUNT(*) rental_COUNT,
+    special_features, 
+	rating,
+	rental_duration
+FROM Film f
+JOIN film_actor fa
+  ON f.film_id = fa.film_id
+JOIN actor a
+  ON a.actor_id = fa.actor_id
+  GROUP BY 2,3,4
+ORDER BY 1 DESC)
+
+select sum(rental_COUNT) rental_COUNT, 
+       cASe 
+		   when rating = 'PG-13'THEN 
+			rating||' - '||'Parents strongly cautioned – Some material may be inappropriate for children under 13'
+		   when rating = 'PG'THEN 
+			rating||' - '||'Parental guidance suggested – Some material may not be suitable for children'
+		   WHEN rating = 'NC-17' THEN 
+			rating||' - '||'No children under 17 admitted.'
+		   WHEN rating = 'R' THEN
+			rating||' - '||'Restricted – Under 17 requires accompanying parent or adult guardian'
+		   WHEN rating = 'G' THEN
+			rating||' - '||'General audiences – All ages admitted'
+		   END rating,
+	  round(avg(rental_duration))rental_duration
+from q2
+GROUP BY rating
+ORDER BY rating DESC;
+-----------------------------
+--Q3 - ¿What wAS the average length of the rental duration?
+--It is required to know what is the average rental time of the 10 most rented movies
+--A query must be created for the name, average rental time and size of the movie
+	 
+WITH q3
+AS (SELECT COUNT(1) COUNT_name ,name, rental_rate,rating,length
+FROM category AS c
+JOIN film_category AS fc
+  ON fc.category_id = c.category_id
+JOIN film AS f
+  ON f.film_id = fc.film_id
+JOIN Inventory AS i
+  ON i.film_id = f.film_id
+JOIN rental AS r
+  ON i.inventory_id = r.inventory_id
+GROUP BY name, rental_rate,rating,length
+ORDER BY name)
+
+select sum(COUNT_name)
+       ,name
+       ,round(avg(rental_rate),2) rental_rate
+       ,round(avg(length)) length
+from q3
+GROUP BY name
+ORDER BY rental_rate DESC;
+
+
+-----------------------------
+--Q4 - ¿What were the 5 genres of movies wAS the most rented?
+--It is required to know the stores, months and years where the most movies were rented per store
+--A query must be created for the name, average rental time and size of the movie
+	 
+SELECT store_id AS Store_id,
+   	   DATE_PART('month', rental_date) AS Rental_month,
+	   DATE_PART('year', rental_date) AS Rental_year,
+	   COUNT(*) AS Count_rentals
+ FROM rental AS R
+ JOIN staff AS s
+   ON r.staff_id = s.staff_id
+GROUP BY 1, 2, 3
+ORDER BY 4 DESC;
