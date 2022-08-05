@@ -17,12 +17,14 @@ def get_filters():
     """
     print('Hello! Let\'s explore some US bikeshare data!')
     # Citys
+	# Citys 2
     city = input('Enter the city you want see data for Chicago , New York City or Washington : ')
     city = city.casefold()
     while city not in CITY_DATA:
         city = input('Invalid city name.Please Try Again!')
         city = city.casefold()
     # Months
+	# Months 2
     months = ['all', 'january', 'february', 'march', 'april', 'may', 'june',
               'july', 'august', 'september','november','december']
     month = input('Enter the month from January to December OR Enter "all" for no month filter : ')
